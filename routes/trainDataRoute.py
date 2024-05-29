@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, jsonify, request
 from config import db
 from models import trainData, predictionModel, nullDataSolution
@@ -15,12 +17,13 @@ def train_model(train_data_id):
         print("TrainData not found")
         return None
 
-    wine_dataframe = get_red_wine_data_as_dataframe(train_data.number_of_train_row)
-    wine_dataframe = shuffle_data(wine_dataframe) if train_data.is_shuffle else wine_dataframe
+    wine_dataframe = get_red_wine_data_as_dataframe(train_data.number_of_train_row)  # DataFrame
+    wine_dataframe = shuffle_data(wine_dataframe) if train_data.is_shuffle else wine_dataframe  # Shuffle
 
-    model = train_model_with_strategy(wine_dataframe, train_data.kpi_column_name, 1)
+    model = train_model_with_strategy(wine_dataframe, train_data.kpi_column_name, train_data.prediction_model)
     model_path = save_model(train_data_id, model)
     return model_path
+
 
 @train_data_blueprint.route('/train-data', methods=['POST'])
 def create_train_data():
@@ -76,10 +79,16 @@ def get_all_train_data():
 
         result.append({
             "id": data.id,
-            "prediction_model_id": data.prediction_model,
-            "prediction_model_name": prediction_model.name if prediction_model else None,
-            "null_data_solution": data.null_data_solution,
-            "null_data_solution_name": null_solution.name if null_solution else None,
+            "prediction_model": {
+                "id": data.prediction_model,
+                "name": prediction_model.name,
+                "description": prediction_model.description,
+            } if prediction_model else None,
+            "null_data_solution": {
+                "id": data.null_data_solution,
+                "name": null_solution.name,
+                "description": null_solution.description
+            } if null_solution else None,
             "validation_percentage": data.validation_percentage,
             "number_of_train_row": data.number_of_train_row,
             "kpi_column_name": data.kpi_column_name,
@@ -102,10 +111,16 @@ def get_train_data_by_id(id):
     prediction_model = predictionModel.PredictionModel.query.filter_by(id=data.prediction_model).first()
     return jsonify({
         "id": data.id,
-        "prediction_model": data.prediction_model,
-        "prediction_model_name": prediction_model.name if prediction_model else None,
-        "null_data_solution": data.null_data_solution,
-        "null_data_solution_name": null_solution.name if null_solution else None,
+        "prediction_model": {
+            "id": data.prediction_model,
+            "name": prediction_model.name,
+            "description": prediction_model.description,
+        } if prediction_model else None,
+        "null_data_solution": {
+            "id": data.null_data_solution,
+            "name": null_solution.name,
+            "description": null_solution.description
+        } if null_solution else None,
         "validation_percentage": data.validation_percentage,
         "number_of_train_row": data.number_of_train_row,
         "kpi_column_name": data.kpi_column_name,
@@ -124,5 +139,5 @@ def delete_train_data(id):
     train_data = trainData.TrainData.query.get_or_404(id)
     db.session.delete(train_data)
     db.session.commit()
-
+    os.remove(f"prediction-model-saves/model-{id}.pickle")
     return jsonify({"message": "Train data deleted successfully."}), 200
