@@ -19,6 +19,7 @@ def train_model(train_data_id):
 
     wine_dataframe = get_red_wine_data_as_dataframe(train_data.number_of_train_row)  # DataFrame
     wine_dataframe = shuffle_data(wine_dataframe) if train_data.is_shuffle else wine_dataframe  # Shuffle
+    wine_dataframe.to_csv(f'csv-train/train_data-{train_data_id}.csv', index=False)  # Save DataFrame
 
     model = train_model_with_strategy(wine_dataframe, train_data.kpi_column_name, train_data.prediction_model)
     model_path = save_model(train_data_id, model)

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, abort
 from config import db
 from models.validationData import ValidationData, ValidationRow
 from models.trainData import TrainData
+from static.trainAfterProcessUtils import validate_model, load_model, load_train_data
 
 validation_blueprint = Blueprint('validation_blueprint', __name__)
 
@@ -16,7 +17,13 @@ def create_validation_data():
     )
     db.session.add(new_validation_data)
     db.session.commit()
+
     train_data = TrainData.query.filter_by(id=new_validation_data.train_data).first()
+    model = load_model(f'prediction-model-saves/model-{new_validation_data.train_data}.pickle')
+    train_dataframe = load_train_data(f'csv-train/train_data-{new_validation_data.train_data}.csv')
+    validation = validate_model(model, train_dataframe, train_data.kpi_column_name, new_validation_data.percentage)
+    validation.to_csv(f'csv-validation/validation_data-{new_validation_data.id}.csv', index=False)  # Save DataFrame
+
     return jsonify({
         "id": new_validation_data.id,
         "percentage": new_validation_data.percentage,
