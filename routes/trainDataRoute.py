@@ -31,7 +31,6 @@ def create_train_data():
     new_train_data = trainData.TrainData(
         prediction_model=data['prediction_model'],
         null_data_solution=data['null_data_solution'],
-        validation_percentage=data['validation_percentage'],
         number_of_train_row=data['number_of_train_row'],
         kpi_column_name=data.get('kpi_column_name'),
         is_shuffle=data.get('is_shuffle', False),
@@ -54,7 +53,6 @@ def create_train_data():
             "path": path,
             "prediction_model": new_train_data.prediction_model,
             "null_data_solution": new_train_data.null_data_solution,
-            "validation_percentage": new_train_data.validation_percentage,
             "number_of_train_row": new_train_data.number_of_train_row,
             "kpi_column_name": new_train_data.kpi_column_name,
             "is_shuffle": new_train_data.is_shuffle,
@@ -89,7 +87,6 @@ def get_all_train_data():
                 "name": null_solution.name,
                 "description": null_solution.description
             } if null_solution else None,
-            "validation_percentage": data.validation_percentage,
             "number_of_train_row": data.number_of_train_row,
             "kpi_column_name": data.kpi_column_name,
             "is_shuffle": data.is_shuffle,
@@ -121,7 +118,6 @@ def get_train_data_by_id(id):
             "name": null_solution.name,
             "description": null_solution.description
         } if null_solution else None,
-        "validation_percentage": data.validation_percentage,
         "number_of_train_row": data.number_of_train_row,
         "kpi_column_name": data.kpi_column_name,
         "is_shuffle": data.is_shuffle,
