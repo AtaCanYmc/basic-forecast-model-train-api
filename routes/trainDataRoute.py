@@ -1,8 +1,10 @@
-from flask import Blueprint, jsonify, request, current_app
+from flask import Blueprint, jsonify, request
 from config import db
 from models import trainData, predictionModel, nullDataSolution
 from models.redWine import get_red_wine_data_as_dataframe
 from static.trainPreprocessUtils import shuffle_data
+from static.trainModelUtils import train_model_with_strategy
+from static.trainAfterProcessUtils import save_model
 
 train_data_blueprint = Blueprint('train_data_blueprint', __name__)
 
@@ -11,12 +13,14 @@ def train_model(train_data_id):
     train_data = trainData.TrainData.query.get(train_data_id)
     if not train_data:
         print("TrainData not found")
-        return
+        return None
 
     wine_dataframe = get_red_wine_data_as_dataframe(train_data.number_of_train_row)
     wine_dataframe = shuffle_data(wine_dataframe) if train_data.is_shuffle else wine_dataframe
-    print(wine_dataframe)
 
+    model = train_model_with_strategy(wine_dataframe, 'quality', 1)
+    model_path = save_model(train_data_id, model)
+    return model_path
 
 @train_data_blueprint.route('/train-data', methods=['POST'])
 def create_train_data():
@@ -24,7 +28,6 @@ def create_train_data():
     new_train_data = trainData.TrainData(
         prediction_model=data['prediction_model'],
         null_data_solution=data['null_data_solution'],
-        model_path=data.get('model_path'),
         validation_percentage=data['validation_percentage'],
         number_of_train_row=data['number_of_train_row'],
         kpi_column_name=data.get('kpi_column_name'),
@@ -39,15 +42,15 @@ def create_train_data():
     db.session.add(new_train_data)
     db.session.commit()
 
-    train_model(new_train_data.id)
+    path = train_model(new_train_data.id)
 
     return jsonify({
         "message": "Train data added successfully.",
         "train_data": {
             "id": new_train_data.id,
+            "path": path,
             "prediction_model": new_train_data.prediction_model,
             "null_data_solution": new_train_data.null_data_solution,
-            "model_path": new_train_data.model_path,
             "validation_percentage": new_train_data.validation_percentage,
             "number_of_train_row": new_train_data.number_of_train_row,
             "kpi_column_name": new_train_data.kpi_column_name,
@@ -77,7 +80,6 @@ def get_all_train_data():
             "prediction_model_name": prediction_model.name if prediction_model else None,
             "null_data_solution": data.null_data_solution,
             "null_data_solution_name": null_solution.name if null_solution else None,
-            "model_path": data.model_path,
             "validation_percentage": data.validation_percentage,
             "number_of_train_row": data.number_of_train_row,
             "kpi_column_name": data.kpi_column_name,
@@ -104,7 +106,6 @@ def get_train_data_by_id(id):
         "prediction_model_name": prediction_model.name if prediction_model else None,
         "null_data_solution": data.null_data_solution,
         "null_data_solution_name": null_solution.name if null_solution else None,
-        "model_path": data.model_path,
         "validation_percentage": data.validation_percentage,
         "number_of_train_row": data.number_of_train_row,
         "kpi_column_name": data.kpi_column_name,

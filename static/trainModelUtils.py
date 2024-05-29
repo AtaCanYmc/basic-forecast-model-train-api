@@ -5,7 +5,14 @@ from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 
 
-def train_LR(dataframe, y_col_name, fit_intercept=None):
+def train_model_with_strategy(dataframe, y_col_name, strategy_id=1):
+    if strategy_id == 1:
+        return train_LR(dataframe, y_col_name)
+    else:
+        raise ValueError("Strategy not recognized. Use min 1 max 8.")
+
+
+def train_LR(dataframe, y_col_name, fit_intercept=True):  # id 1
     y = dataframe.pop(y_col_name).to_numpy()
     X = dataframe.to_numpy()
 

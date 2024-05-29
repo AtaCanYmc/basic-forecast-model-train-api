@@ -12,7 +12,7 @@ def shuffle_data(dataframe, random_state=42):
     return shuffled_data
 
 
-def data_standardization(request_id, dataframe, output_dir='../standardizer'):
+def data_standardization(request_id, dataframe, output_dir='standardizer/'):
     """
     Standardizes the features of the dataframe using StandardScaler and saves the scaler model.
 
