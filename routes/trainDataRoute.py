@@ -18,7 +18,7 @@ def train_model(train_data_id):
     wine_dataframe = get_red_wine_data_as_dataframe(train_data.number_of_train_row)
     wine_dataframe = shuffle_data(wine_dataframe) if train_data.is_shuffle else wine_dataframe
 
-    model = train_model_with_strategy(wine_dataframe, 'quality', 1)
+    model = train_model_with_strategy(wine_dataframe, train_data.kpi_column_name, 1)
     model_path = save_model(train_data_id, model)
     return model_path
 

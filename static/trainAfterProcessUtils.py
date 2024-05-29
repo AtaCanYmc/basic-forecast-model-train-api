@@ -13,5 +13,4 @@ def save_model(request_id, model):
     with open(path, "wb") as file:
         pickle.dump(model, file)
 
-    print(path)
     return path
