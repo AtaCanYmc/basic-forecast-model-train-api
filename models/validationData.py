@@ -6,7 +6,6 @@ class ValidationData(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     train_data = db.Column(db.Integer, db.ForeignKey('train_data.id'), nullable=False)
     percentage = db.Column(db.Float, nullable=False)
-    validation_rows = db.relationship('ValidationRow', backref='validation_data', cascade='all, delete-orphan')
 
 
 class ValidationRow(db.Model):
