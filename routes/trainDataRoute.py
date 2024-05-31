@@ -1,6 +1,6 @@
 import os
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file, abort
 from config import db
 from models import trainData, predictionModel, nullDataSolution
 from models.redWine import get_red_wine_data_as_dataframe
@@ -138,3 +138,13 @@ def delete_train_data(id):
     db.session.commit()
     os.remove(f"prediction-model-saves/model-{id}.pickle")
     return jsonify({"message": "Train data deleted successfully."}), 200
+
+
+@train_data_blueprint.route('/train-data/<int:id>/csv', methods=['GET'])
+def get_train_data_csv(id):
+    csv_path = f'csv-train/train_data-{id}.csv'
+
+    if not os.path.exists(csv_path):
+        abort(404, description=f'CSV file {id} not found.')
+
+    return send_file(csv_path, as_attachment=True)

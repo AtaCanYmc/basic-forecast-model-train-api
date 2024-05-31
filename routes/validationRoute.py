@@ -1,4 +1,6 @@
-from flask import Blueprint, request, jsonify, abort
+import os
+
+from flask import Blueprint, request, jsonify, abort, send_file
 from config import db
 from models.validationData import ValidationData, ValidationRow
 from models.trainData import TrainData
@@ -132,3 +134,12 @@ def get_validation_row(id):
         "prediction": validation_row.prediction,
         "error": validation_row.error
     })
+
+@validation_blueprint.route('/validation-data/<int:id>/csv', methods=['GET'])
+def get_train_data_csv(id):
+    csv_path = f'csv-validation/validation_data-{id}.csv'
+
+    if not os.path.exists(csv_path):
+        abort(404, description=f'CSV file {id} not found.')
+
+    return send_file(csv_path, as_attachment=True)
