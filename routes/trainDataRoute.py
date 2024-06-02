@@ -140,7 +140,7 @@ def delete_train_data(id):
     return jsonify({"message": "Train data deleted successfully."}), 200
 
 
-@train_data_blueprint.route('/train-data/<int:id>/csv', methods=['GET'])
+@train_data_blueprint.route('/train-data/<int:id>/download', methods=['GET'])
 def get_train_data_csv(id):
     csv_path = f'csv-train/train_data-{id}.csv'
 

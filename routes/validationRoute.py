@@ -9,7 +9,6 @@ from static.trainAfterProcessUtils import validate_model, load_model, load_train
 validation_blueprint = Blueprint('validation_blueprint', __name__)
 
 
-# ValidationData Routes
 @validation_blueprint.route('/validation-data', methods=['POST'])
 def create_validation_data():
     data = request.get_json()
@@ -135,7 +134,8 @@ def get_validation_row(id):
         "error": validation_row.error
     })
 
-@validation_blueprint.route('/validation-data/<int:id>/csv', methods=['GET'])
+
+@validation_blueprint.route('/validation-data/<int:id>/download', methods=['GET'])
 def get_train_data_csv(id):
     csv_path = f'csv-validation/validation_data-{id}.csv'
 

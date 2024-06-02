@@ -1,4 +1,9 @@
+import os
+
+import pandas as pd
 from flask import Flask, request, jsonify, current_app, Blueprint
+from werkzeug.utils import secure_filename
+
 from models import redWine
 
 red_wines = Blueprint('red-wines', __name__)
@@ -73,6 +78,35 @@ def create_wine():
     redWine.db.session.add(wine)
     redWine.db.session.commit()
     return jsonify({"message": "Red wine added successfully."}), 201
+
+
+# Endpoint to upload CSV and create multiple wines
+@app.route('/red-wines/upload', methods=['POST'])
+def upload_wines():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    if file:
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+
+        try:
+            data = pd.read_csv(file_path)
+            for index, row in data.iterrows():
+                wine_data = row.to_dict()
+                wine = redWine.RedWine(**wine_data)
+                redWine.db.session.add(wine)
+            redWine.db.session.commit()
+            return jsonify({"message": "Red wines added successfully."}), 201
+        except Exception as e:
+            redWine.db.session.rollback()
+            return jsonify({"error": str(e)}), 500
 
 
 # UPDATE (PUT): Update a specific red wine
